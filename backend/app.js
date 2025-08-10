@@ -8,6 +8,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const userRoutes = require("./routes/userRoutes");
 const path = require("path");
 const appError = require("./utils/appError");
+const postRoutes= require("./routes/postRoutes");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use(express.urlencoded({extended:true, limit:"10kb"}));
 
 // routes fro users
 app.use('/api/users',userRoutes)
+app.use('/api/posts',postRoutes)
 
 // routes for posts
 
