@@ -2,12 +2,13 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const getDataUri = require("../utils/dataUri");
+const appError = require("../utils/appError");
 
 exports.getProfile = catchAsync(async (req, res, next) => {
     const {id} = req.params;
     
     const user =  await User.findById(id).select("-password -otp -otpExpires -resetPasswordOTP -resetPasswordOTPExpires -passwordConfirm").populate({
-        path:"post",
+        path:"posts",
         options:{sort:{createdAt:-1}}
     }).populate({
         path:"savedPosts",
@@ -40,10 +41,15 @@ exports.editProfile = catchAsync(async (req, res, next) => {
     }
 
     if (req.file) {
-        const profilePicture = req.file.path;
-        const fileUrl = await getDataUri(profilePicture);
-        const cloudRessponse = await uploadToCloudinary(fileUrl);
-        user.profilePicture = cloudRessponse.secure_url;
+        const fileUri = getDataUri(req.file);
+        if (fileUri) {
+            const myCloud = await uploadToCloudinary(fileUri);
+            if (myCloud && myCloud.secure_url) {
+                user.profilePicture = myCloud.secure_url;
+            } else {
+                return next(new appError("Failed to upload profile picture. Please try again.", 500));
+            }
+        }
     }
 
     await user.save({ validateBeforeSave: false });
@@ -125,4 +131,4 @@ exports.getMe = catchAsync(async (req, res, next) => {
         }
     });
 
-});  
+});

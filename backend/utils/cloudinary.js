@@ -11,11 +11,13 @@ cloudinary.config({
 
 const uploadToCloudinary = async (fileUrl) => {
     try {
-         const response = await cloudinary.uploader.upload(fileUrl)
+         const response = await cloudinary.uploader.upload(fileUrl, {
+            resource_type: "auto",
+         })
          return response
     } catch (error) {
         console.log(error)
-        throw new Error("Failed to upload image to Cloudinary")
+        return null
     }
 }
 

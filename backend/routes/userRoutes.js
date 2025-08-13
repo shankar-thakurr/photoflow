@@ -18,9 +18,9 @@ router.post('/change-password',isAuthenticated,changePassword)
 
 // User
 
-router.post('/profile/:id',getProfile)
+router.get('/profile/:id',getProfile)
 router.post('/edit-profile',isAuthenticated, upload.single("profilePicture"),editProfile)
-router.post ('/suggested-user',isAuthenticated,suggestedUser)
+router.get('/suggested-users',isAuthenticated,suggestedUser)
 router.post('/follow-unfollow/:id',isAuthenticated,followUnfollow)
 router.get('/me',isAuthenticated,getMe)
 

@@ -5,16 +5,16 @@ export interface User{
     password?:string,
     profilePicture?:string,
     bio?:string,
-    follwers:string[],
-    follwings:string[],
+    followers:string[],
+    followings:string[],
     posts:Post[],
-    savaPosts:string[] | Post[],
+    savedPosts:string[] | Post[],
     isVerified:boolean,
 }
 
-export interface Commnet{
+export interface Comment{
     _id:string,
-    test:string,
+    text:string,
     user:{
         _id:string,
         username:string,
@@ -32,6 +32,6 @@ export  interface Post{
     },
     user:User | undefined,
     likes:string[],
-    comments:Commnet[],
+    comments:Comment[],
     createdAt:string
 }
