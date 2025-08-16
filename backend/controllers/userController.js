@@ -78,31 +78,31 @@ exports.suggestedUser = catchAsync(async (req, res, next) => {
 
 exports.followUnfollow = catchAsync(async (req, res, next) => {
     const loginUserId = req.user.id;
-    const tragetUserId = req.params.id;
+    const targetUserId = req.params.id;
 
-    if(loginUserId.toString() === tragetUserId){
+    if(loginUserId.toString() === targetUserId){
         return next(new appError("You can't follow/unfollow yourself",400))
     }
 
-    const tragetUser = await User.findById(tragetUserId);
+    const targetUser = await User.findById(targetUserId);
 
-    if(!tragetUser){
+    if(!targetUser){
         return next(new appError("User not found",404))
     }
 
-    const isFollowing = tragetUser.follwers.includes(loginUserId);
+    const isFollowing = targetUser.followers.includes(loginUserId);
 
-    if(!isFollowing){
+    if(isFollowing){
+        // Unfollow
         await Promise.all([
-            User.updateOne({ _id: loginUserId }, { $pull: { follwering: tragetUserId } }),
-
-            User.updateOne({ _id: tragetUserId }, { $pull: { follwers: loginUserId } })
+            User.updateOne({ _id: loginUserId }, { $pull: { followings: targetUserId } }),
+            User.updateOne({ _id: targetUserId }, { $pull: { followers: loginUserId } })
         ])
     }else{
+        // Follow
         await Promise.all([
-            User.updateOne({ _id: loginUserId }, { $addToSet : { follwering: tragetUserId } }),
-
-            User.updateOne({ _id: tragetUserId }, { $addToSet : { follwers: loginUserId } })
+            User.updateOne({ _id: loginUserId }, { $addToSet : { followings: targetUserId } }),
+            User.updateOne({ _id: targetUserId }, { $addToSet : { followers: loginUserId } })
         ])
     }
 
@@ -131,4 +131,33 @@ exports.getMe = catchAsync(async (req, res, next) => {
         }
     });
 
+});
+
+exports.saveUnsavePost = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const postId = req.params.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return next(new appError("User not found", 404));
+    }
+
+    const isPostSaved = user.savedPosts.includes(postId);
+
+    if (isPostSaved) {
+        // Unsave the post
+        await User.updateOne({ _id: userId }, { $pull: { savedPosts: postId } });
+        res.status(200).json({
+            status: "success",
+            message: "Post unsaved successfully",
+        });
+    } else {
+        // Save the post
+        await User.updateOne({ _id: userId }, { $addToSet: { savedPosts: postId } });
+        res.status(200).json({
+            status: "success",
+            message: "Post saved successfully",
+        });
+    }
 });

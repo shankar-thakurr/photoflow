@@ -14,8 +14,9 @@ const Post = ({ userProfile }: Props) => {
                     <Image
                         src={post.image?.url || ''}
                         alt="post"
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: "cover" }}
                         className="group-hover:opacity-80 transition-opacity"
                     />
                 </div>

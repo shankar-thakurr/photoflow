@@ -1,8 +1,9 @@
+'use client'
 import Profile from '@/components/Profile/Profile';
 import React from 'react';
 
-const ProfilePage = async({params}: {params: {id: string}}) => {
-    const id = (await params).id
+const ProfilePage = async ({params}: {params: {id: string}}) => {
+    const id = params.id
     console.log(id)
     return (
         <div>

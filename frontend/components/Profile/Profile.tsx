@@ -16,15 +16,16 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import Post from './Post';
 import Save from './Save';
+import useFollowUnFollow from '../hooks/use-auth';
 
 type Props ={
     id: string
 }
 const Profile = ({id}: Props) => {
-    console.log('COMPONENT CALLED',id)
+  const {handleFollowUnfollow} = useFollowUnFollow()
     const router = useRouter()
 
-    const user = useSelector((state: RootState) => state.auth.user)
+    const loggedInUser = useSelector((state: RootState) => state.auth.user)
     const [postOrSave, setpostOrSave] = useState<string>('POST')
     const [isLoading, setisLoading] = useState(false)
     const [userProfile, setUserProfile] = useState<User>()
@@ -32,25 +33,28 @@ const Profile = ({id}: Props) => {
 
     const handleSheetClose = () => setIsSheetOpen(false);
 
-    const isOwnProfile = user?._id === id
-    const isFollowing = user?.followings?.includes(id)
-
-    console.log("IS OWN PROFILE",isOwnProfile)
-    console.log("User",userProfile)
+    const isOwnProfile = loggedInUser?._id === id
+    const isFollowing = loggedInUser?.followings?.includes(id)
 
     useEffect(() => {
-        if(!user){
-            router.push('/auth/login')
+        if (!loggedInUser) {
+            router.push('/auth/login');
+            return;
         }
-        const getUser=async() =>{
-            const getUserRequest = async () => await axios.get(`${BASE_API_URL}/users/profile/${id}`, { withCredentials: true });
-            const result = await handleAuthRequest(getUserRequest,setisLoading);
-            if(result){
-                setUserProfile(result?.data.data.user)
-            }
+
+        if (isOwnProfile) {
+            setUserProfile(loggedInUser);
+        } else {
+            const getUser = async () => {
+                const getUserRequest = async () => await axios.get(`${BASE_API_URL}/users/profile/${id}`, { withCredentials: true });
+                const result = await handleAuthRequest(getUserRequest, setisLoading);
+                if (result) {
+                    setUserProfile(result?.data.data.user);
+                }
+            };
+            getUser();
         }
-        getUser()
-    },[user,router,id])
+    }, [loggedInUser, id, isOwnProfile, router]);
 
     if (isLoading) {
         return (
@@ -116,7 +120,7 @@ const Profile = ({id}: Props) => {
               <Avatar className="w-32 h-32 md:w-40 md:h-40 mb-6 md:mb-0">
                 <AvatarImage src={userProfile?.profilePicture} className="object-cover" />
                 <AvatarFallback className="text-4xl">
-                  {user?.username?.charAt(0).toUpperCase() || 'U'}
+                  {userProfile?.username?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 text-center md:text-left">
@@ -129,7 +133,7 @@ const Profile = ({id}: Props) => {
                   )}
                   {!isOwnProfile && (
                     <div className="flex items-center space-x-2">
-                      <Button variant={isFollowing ? 'destructive' : 'secondary'}>
+                      <Button variant={isFollowing ? 'destructive' : 'secondary'} onClick={()=>handleFollowUnfollow(id)}>
                         {isFollowing ? 'Unfollow' : 'Follow'}
                       </Button>
                       <Button variant="secondary">Message</Button>

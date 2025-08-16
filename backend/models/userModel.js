@@ -43,13 +43,13 @@ const userSchema = new mongoose.Schema({
     maxLength: 200,
     default: "",
   },
-  follwers: [
+  followers: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   ],
-  follwings: [
+  followings: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

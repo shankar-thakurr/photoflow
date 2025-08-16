@@ -9,13 +9,14 @@ type Props = {
 const Save = ({ userProfile }: Props) => {
     return (
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4'>
-            {userProfile?.savedPosts?.map((post) => (
+            {userProfile?.savedPosts?.filter(post => (post as Post).image?.url).map((post) => (
                 <div key={(post as Post)._id} className="relative w-full h-48 md:h-72 group cursor-pointer">
                     <Image
-                        src={(post as Post).image?.url || ''}
+                        src={(post as Post).image!.url}
                         alt="post"
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: "cover" }}
                         className="group-hover:opacity-80 transition-opacity"
                     />
                 </div>

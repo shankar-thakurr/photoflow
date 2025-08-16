@@ -20,7 +20,7 @@ export interface Comment{
         username:string,
         profilePicture:string,
     };
-    createAt:string
+    createdAt:string
 }
 
 export  interface Post{

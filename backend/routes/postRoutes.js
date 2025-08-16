@@ -7,7 +7,7 @@ const router =express.Router();
 
 // define routes
 router.post('/create-post',isAuthenticated,upload.single("image"),createPost)
-router.get('/all-posts',getAllPosts)
+router.get('/all',getAllPosts)
 router.get('/user-posts/:id',getUserPosts)
 router.post('/save-unsave-post/:postId', isAuthenticated,saveOrUnsavePost)
 router.delete('/delete-post/:id',isAuthenticated,deletePost)

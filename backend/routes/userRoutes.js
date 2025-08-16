@@ -1,7 +1,7 @@
 const express = require("express");
 const { signup, verifyAccount, resendOtp, login, logout, forgotPassword, resetPassword, changePassword,  } = require("../controllers/AuthController");
 const isAuthenticated = require("../middlewares/IsAuthenticated");
-const { getProfile, editProfile, suggestedUser, followUnfollow, getMe } = require("../controllers/userController");
+const { getProfile, editProfile, suggestedUser, followUnfollow, getMe, saveUnsavePost } = require("../controllers/userController");
 const upload = require("../middlewares/multer");
 const router = express.Router();
 
@@ -23,6 +23,7 @@ router.post('/edit-profile',isAuthenticated, upload.single("profilePicture"),edi
 router.get('/suggested-users',isAuthenticated,suggestedUser)
 router.post('/follow-unfollow/:id',isAuthenticated,followUnfollow)
 router.get('/me',isAuthenticated,getMe)
+router.post('/save-unsave/:id',isAuthenticated,saveUnsavePost)
 
 
 module.exports = router;

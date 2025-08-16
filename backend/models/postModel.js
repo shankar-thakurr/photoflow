@@ -1,9 +1,6 @@
-const mongose = require("mongoose");
-const { create } = require("./userModel");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
-
-const postSchema = new mongose.Schema({
+const postSchema = new mongoose.Schema({
     caption:{
         type:String,
         maxLength:[2200,"Caption should be less than 2200 characters"],
@@ -20,20 +17,20 @@ const postSchema = new mongose.Schema({
         }
     },
     user:{
-        type:mongose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"User",
         required:[true,"User id is required"],
 
     },
     likes:[
         {
-            type:mongose.Schema.Types.ObjectId,
+            type:mongoose.Schema.Types.ObjectId,
             ref:"User",
         }
     ],
     comments:[
         {
-            type:mongose.Schema.Types.ObjectId,
+            type:mongoose.Schema.Types.ObjectId,
             ref:"Comment",
         }
     ],

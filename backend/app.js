@@ -10,6 +10,7 @@ const path = require("path");
 const appError = require("./utils/appError");
 const postRoutes= require("./routes/postRoutes");
 
+
 const app = express();
 
 app.use('/',express.static("uploads"));

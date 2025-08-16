@@ -10,6 +10,7 @@ import { logout } from '@/store/authSlice';
 import axios from 'axios';
 import { BASE_API_URL } from '@/server';
 import { toast } from 'sonner';
+import CreatePost from './CreatePost';
 
 interface LeftSidebarProps {
   onNavigate?: () => void; // For mobile sheet closing
@@ -21,6 +22,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onNavigate }) => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [isDialogOpne, setisDialogOpne] = useState(false);
+
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -48,7 +52,10 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onNavigate }) => {
       handleLogout();
       return;
     }
-    
+    if (label === 'Create') {
+      setisDialogOpne(true);
+      return;
+    }
     if (path) {
       router.push(path);
       onNavigate?.(); // Close mobile menu if applicable
@@ -109,7 +116,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onNavigate }) => {
   return (
     <nav className="h-full flex flex-col" role="navigation" aria-label="Main navigation">
       {/* Logo Section */}
+
       <div className="p-4 lg:p-6">
+          <CreatePost isOpen={isDialogOpne} onClose={() => setisDialogOpne(false)}/>
         <button
           onClick={() => handleNavigation('Home', '/')}
           className="block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"

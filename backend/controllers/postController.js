@@ -4,6 +4,7 @@ const appError = require("../utils/appError");
 const sharp = require("sharp");
 const { uploadToCloudinary , cloudinary} = require("../utils/cloudinary");
 const User = require("../models/userModel");
+const Comment = require("../models/commentModel");
 
 
 exports.createPost = catchAsync(async(req,res,next)=>{
@@ -103,41 +104,43 @@ exports.getUserPosts = catchAsync(async(req,res,next)=>{
     })
 })
 
-exports.saveOrUnsavePost = catchAsync(async(req,res,next)=>{
-    const userId = req.user._id
-    const postId = req.params.postId;
+exports.saveOrUnsavePost = catchAsync(async (req, res, next) => {
+    const userId = req.user._id;
+    const { postId } = req.params;
 
-    const user = await User.findById(userId)
+    const user = await User.findById(userId);
 
-    if(!user){
-        return next(new appError("User not found",404))
+    if (!user) {
+        return next(new appError("User not found", 404));
     }
 
-    const isPostSave = user.savedPosts.includes(postId)
+    const isPostSaved = user.savedPosts.includes(postId);
 
-    if(!isPostSave){
-      user.savedPosts.pull(postId);
-      await user.save({validateBeforeSave:false})
+    if (isPostSaved) {
+        // Unsave the post
+        user.savedPosts.pull(postId);
+        await user.save({ validateBeforeSave: false });
 
-      return res.status(200).json({
-        status:"success",
-        message:"Post unsaved successfully",
-        data:{
-            user,
-        }
-      })
-    }else{
-        user.savedPosts.push(postId)
-        await user.save({validateBeforeSave:false})
         return res.status(200).json({
-            status:"success",
-            message:"Post saved successfully",
-            data:{
+            status: "success",
+            message: "Post unsaved successfully",
+            data: {
                 user,
-            }
-        })
+            },
+        });
+    } else {
+        // Save the post
+        user.savedPosts.push(postId);
+        await user.save({ validateBeforeSave: false });
+        return res.status(200).json({
+            status: "success",
+            message: "Post saved successfully",
+            data: {
+                user,
+            },
+        });
     }
-})
+});
 
 exports.deletePost = catchAsync(async(req,res,next)=>{
     const {id} = req.params;
@@ -181,39 +184,33 @@ exports.deletePost = catchAsync(async(req,res,next)=>{
     })
 })
 
-exports.likeOrUnlikePost = catchAsync(async(req,res,next)=>{
+exports.likeOrUnlikePost = catchAsync(async (req, res, next) => {
     const userId = req.user._id;
-    const postId = req.params.postId;
+    const { id } = req.params;
 
-    const post = await Post.findById(id)
-    if(!post){
-        return next(new appError("Post not found",404))
+    let post = await Post.findById(id);
+    if (!post) {
+        return next(new appError("Post not found", 404));
     }
 
-    const isLiked = post.likes.includes(userId)
+    const isLiked = post.likes.includes(userId);
 
-    if(!isLiked){
-        await Post.findByIdAndUpdate(id,{$pull:{likes:userId}},{new:true})
-        
-        return res.status(200).json({   
-            status:"success",
-            message:"Post disliked successfully",
-            data:{
-                post,
-            }
-        })
-    }else{
-        await Post.findByIdAndUpdate(id,{$addToSet:{likes:userId}},{new:true})
-        
-        return res.status(200).json({
-            status:"success",
-            message:"Post liked successfully",
-            data:{
-                post,
-            }
-        })
-    }  
-})
+    if (isLiked) {
+        // Unlike the post
+        post = await Post.findByIdAndUpdate(id, { $pull: { likes: userId } }, { new: true });
+    } else {
+        // Like the post
+        post = await Post.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true });
+    }
+
+    return res.status(200).json({
+        status: "success",
+        message: isLiked ? "Post disliked successfully" : "Post liked successfully",
+        data: {
+            post,
+        },
+    });
+});
 
 exports.addComment = catchAsync(async(req,res,next)=>{
     const {id:postId} = req.params
@@ -231,22 +228,24 @@ exports.addComment = catchAsync(async(req,res,next)=>{
         return next(new appError("Commnet text is required",404))
     }
 
-    const comment = await Comment.create({
+    let comment = await Comment.create({
         text,
-        user:userId,
-        createdAtL:Date.now(),
-    })
-    post.comments.push(comment._id)
-    await post.save({validateBeforeSave:false})
+        user: userId,
+    });
 
-    await comment.populate({
-        path:'user',
-        select:"username profilePicture bio",
-        data:{
+    post.comments.push(comment._id);
+    await post.save({ validateBeforeSave: false });
+
+    comment = await comment.populate({
+        path: 'user',
+        select: 'username profilePicture bio',
+    });
+
+    res.status(201).json({
+        status: 'success',
+        message: 'Comment added successfully',
+        data: {
             comment,
-        }
-    })
-
-    
-
-})
+        },
+    });
+});
